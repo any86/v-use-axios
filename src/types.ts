@@ -1,16 +1,7 @@
-import { AxiosRequestConfig, AxiosInstance, AxiosResponse, Method } from 'axios';
 import { Ref } from 'vue';
 export type UseAxiosReturn<T> = [Ref<boolean>, Ref<T>, { error: Ref<any>, up: Ref<number>, down: Ref<number> }]
-
-export interface UseAxios<T = AxiosResponse> {
-    <T>(options: AxiosRequestConfig, transformResponse: (a: any) => T): UseAxiosReturn<T>;
-    get?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    post?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    put?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    patch?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    delete?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-}
-
+export type TransformResponse<T = any> = (a: any) => T;
+export type PayloadOrTransformResponse = Record<string | number, any> | TransformResponse
 export interface progressEvent {
     total: number;
     loaded: number;
@@ -18,6 +9,6 @@ export interface progressEvent {
 
 // declare module '@vue/runtime-core' {
 //     export interface ComponentCustomProperties {
-//         $useAxios: UseAxios;
+//         $axios: AxiosInstance;
 //     }
 // }

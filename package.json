@@ -1,7 +1,7 @@
 {
   "name": "v-use-axios",
   "description": "让我们优雅的在vue3中使用axios",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "dist/index.js",
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
