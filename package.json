@@ -1,8 +1,8 @@
 {
   "name": "v-use-axios",
-  "description": "",
-  "version": "0.0.1",
-  "main": "index.js",
+  "description": "让我们优雅的在vue3中使用axios",
+  "version": "0.0.4",
+  "main": "dist/index.js",
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
@@ -14,12 +14,14 @@
     "typescript": "^4.3.4",
     "vue": "^3.1.1"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "rollup -c  --watch --environment NODE_ENV:development",
     "build": "rollup -c"
-
   },
+  "typings": "dist/types.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/any86/vuse-axios.git"

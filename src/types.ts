@@ -18,6 +18,6 @@ export interface progressEvent {
 
 declare module '@vue/runtime-core' {
     export interface ComponentCustomProperties {
-        $useAxio: UseAxios;
+        $useAxios: UseAxios;
     }
 }
