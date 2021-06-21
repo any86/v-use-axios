@@ -1,4 +1,4 @@
-const typescript = require('@rollup/plugin-typescript');
+const typescript = require('rollup-plugin-typescript2');
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 const json = require('@rollup/plugin-json');
 const replace = require('@rollup/plugin-replace');
@@ -11,6 +11,8 @@ export default {
         typescript({
             exclude: 'node_modules/**',
             typescript: require('typescript'),
+            tsconfig: "./tsconfig.json",
+            
         }),
         nodeResolve(),
         json(),
@@ -20,11 +22,24 @@ export default {
         }),
     ],
     external: ['vue', 'axios'],
-    output: [{
-        // globals: { 'any-scroll': 'AnyTouch',raf:'raf' },
-        format: 'umd',
-        name: 'vUseAxios',
-        file: `index.js`,
-        sourcemap: false,
-    }]
+    output: [
+        {
+            format: 'es',
+            file: `dist/index.es.js`,
+            sourcemap: true,
+        },
+
+        {
+            format: 'cjs',
+            file: `dist/index.js`,
+            exports: 'default',
+            sourcemap: true,
+        },
+        {
+            globals: { 'vue': 'Vue' },
+            format: 'umd',
+            name: 'useAxios',
+            file: `dist/useAxios.umd.js`,
+            sourcemap: true,
+        }]
 };

@@ -1,70 +1,91 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import { createApp,h } from 'vue';
+import { ref } from 'vue';
+// type
+import { App, Ref } from 'vue';
+import { AxiosRequestConfig, AxiosInstance, AxiosResponse, Method } from 'axios';
+interface progressEvent {
+    total: number;
+    loaded: number;
+}
 
+const KEY_DATA = 'data';
+const KEY_PARAMS = 'params';
+const METHOD_MAP = {
+    'get': KEY_PARAMS,
+    'post': KEY_DATA,
+    'put': KEY_PARAMS,
+    'patch': KEY_DATA,
+    'delete': KEY_PARAMS,
+}
 
+type MEHOTD_NAME_LIST = keyof typeof METHOD_MAP;
+type UseAxiosReturn<T> = [Ref<boolean>, Ref<T>, { error: Ref<any>, up: Ref<number>, down: Ref<number> }]
 
+interface UseAxios<T = AxiosResponse> {
+    <T>(options: AxiosRequestConfig, transformResponse: (a: any) => T): UseAxiosReturn<T>;
+    get?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
+    post?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
+    put?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
+    patch?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
+    delete?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
+}
 
+export default {
+    install: (app: App, axios: AxiosInstance) => {
 
-// export function useAxios<T = any>(options: AxiosRequestConfig, transformResponse: (a: any) => any = (a) => a): [Ref<any>, Ref<T>, Ref<any>] {
-//     const _isLoading = ref(true);
-//     const _data = ref();
-//     const _error = ref();
-//     http.request(options)
-//         .then((data) => {
-//             _data.value = transformResponse(data);
-//         })
-//         .catch((error) => {
-//             _error.value = error;
-//         }).finally(() => {
-//             _isLoading.value = false;
-//         });
+        const useAxios: UseAxios = function (options: AxiosRequestConfig, transformResponse = a => a) {
+            const _uploadProgressRef = ref(0);
+            const _downloadProgressRef = ref(0);
+            const _errorRef = ref();
+            const _isLoadingRef = ref(true);
+            const _responseRef = ref();
+            axios.request({
+                ...options,
+                onUploadProgress(e) {
+                    _uploadProgressRef.value = _calcProgress(e)
+                },
 
-//     return [_isLoading, _data, _error];
-// }
+                onDownloadProgress(e) {
+                    _downloadProgressRef.value = _calcProgress(e)
+                }
+            }).then((response) => {
+                _responseRef.value = transformResponse(response);
+            }).catch((error) => {
+                _errorRef.value = error;
+            }).finally(() => {
+                _isLoadingRef.value = false;
+            });
 
+            return [_isLoadingRef, _responseRef, {
+                error: _errorRef,
+                up: _uploadProgressRef,
+                down: _downloadProgressRef
+            }];
+        }
 
-// export function useHttpGet<T = any>(url: string, paramsOrTransform?: Record<string, any>, transformResponse: (a: any) => any = (a) => a): [Ref<any>, Ref<T>, Ref<any>] {
-//     if (isFunction(paramsOrTransform)) {
-//         return useAxios<T>({ url, method: 'get' }, paramsOrTransform);
-//     } else {
-//         return useAxios<T>({ url, method: 'get', params: paramsOrTransform }, transformResponse);
-//     }
-// }
+        function _warp<T = any>(method: Method, url: string, payloadOrTransform: any, transformResponse: (a: any) => T = (a) => a) {
+            const methodLow = method.toLocaleLowerCase() as keyof typeof METHOD_MAP;
+            if (isFunction(payloadOrTransform)) {
+                return useAxios<T>({ url, method }, payloadOrTransform);
+            } else {
+                return useAxios<T>({ url, method, [METHOD_MAP[methodLow]]: payloadOrTransform }, transformResponse);
+            }
+        }
 
+        for (const method in METHOD_MAP) {
+            useAxios[method as MEHOTD_NAME_LIST] = function (url, paramsOrTransform, transformResponse) {
+                return _warp(method as Method, url, paramsOrTransform, transformResponse);
+            }
+        }
 
-// export function useHttpPost<T = any>(url: string, paramsOrTransform?: Record<string, any>, transformResponse: (a: any) => any = (a) => a): [Ref<any>, Ref<T>, Ref<any>] {
-//     if (isFunction(paramsOrTransform)) {
-//         return useAxios<T>({ url, method: 'post' }, transformResponse);
-//     } else {
-//         return useAxios<T>({ url, method: 'get', data: paramsOrTransform }, transformResponse);
-//     }
-// }
-
-// export const useHttp = useHttpGet;
-// /**
-//  * 设置token
-//  * @param {String} token 
-//  */
-// export const setHttpToken = (token: string) => {
-//     const __token = `Bearer ${token}`
-//     localStorage.setItem(TOKEN_NAME, __token);
-//     http.defaults.headers['Authorization'] = __token;
-// };
-
-
-
-
-const p = {
-    install: (app:any, options:any) => {
-console.log(app);
+        app.config.globalProperties.$useAxios = useAxios;
     }
 }
 
+function _calcProgress(e: progressEvent) {
+    const { loaded, total } = e;
+    return loaded / total;
+}
 
-const app = createApp({
-    render(){
-        return h('div')
-    }
-})
-
-app.use(p)
+function isFunction(input: unknown): input is Function {
+    return '[object Function]' === Object.prototype.toString.call(input);
+}

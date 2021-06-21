@@ -24,7 +24,7 @@
         // 生成sourceMap
         "sourceMap": true,
         // 目标文件所在路径
-        "outDir": "./lib",
+        "outDir": "./dist",
         // 编译过程中需要引入的库文件的列表
         "lib": ["dom", "esnext"],
         // 额外支持解构/forof等功能
@@ -32,7 +32,7 @@
         // 是否生成声明文件
         "declaration": false,
         // 声明文件路径
-        // "declarationDir": "./lib",
+        // "declarationDir": "dist",
         // 此处设置为node,才能解析import xx from 'xx'
         "moduleResolution": "node",
         "baseUrl": ".",

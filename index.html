@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://unpkg.com/vue@next"></script>
+        <script src="https://unpkg.com/axios"></script>
+        <title>v-vue-axios</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="./dist/useAxios.umd.js"></script>
+        <script>
+            console.log(Vue);
+            const { createApp, h } = Vue;
+            const app = createApp({
+                render() {
+                    return h('div', {});
+                },
+                mounted() {
+                    this.$useAxios.get('/get',{get:1})
+                    this.$useAxios.post('/post',{post:1})
+                    this.$useAxios.put('/put',{put:1})
+                    this.$useAxios.delete('/delete',{delete:1})
+                    this.$useAxios.patch('/patch',{patch:1})
+
+                    console.log(this.$useAxios);
+                },
+            });
+
+            app.use(useAxios, axios, { a: 1, b: 2 });
+            app.mount('#app');
+        </script>
+    </body>
+</html>
