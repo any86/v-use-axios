@@ -1,35 +1,22 @@
 import { ref } from 'vue';
 // type
-import { App, Ref } from 'vue';
-import { AxiosRequestConfig, AxiosInstance, AxiosResponse, Method } from 'axios';
-interface progressEvent {
-    total: number;
-    loaded: number;
-}
+import { App } from 'vue';
+import { AxiosRequestConfig, AxiosInstance, Method } from 'axios';
+import { UseAxios, progressEvent } from './types'
 
 const KEY_DATA = 'data';
 const KEY_PARAMS = 'params';
 const METHOD_MAP = {
     'get': KEY_PARAMS,
     'post': KEY_DATA,
-    'put': KEY_PARAMS,
-    'patch': KEY_DATA,
-    'delete': KEY_PARAMS,
-}
-
-type MEHOTD_NAME_LIST = keyof typeof METHOD_MAP;
-type UseAxiosReturn<T> = [Ref<boolean>, Ref<T>, { error: Ref<any>, up: Ref<number>, down: Ref<number> }]
-
-interface UseAxios<T = AxiosResponse> {
-    <T>(options: AxiosRequestConfig, transformResponse: (a: any) => T): UseAxiosReturn<T>;
-    get?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    post?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    put?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    patch?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
-    delete?: (url: string, payloadOrTransform: any, transformResponse: (a: any) => T) => UseAxiosReturn<T>;
 }
 
 export default {
+    /**
+     * 初始化插件
+     * @param app vue实例
+     * @param axios axios实例
+     */
     install: (app: App, axios: AxiosInstance) => {
 
         const useAxios: UseAxios = function (options: AxiosRequestConfig, transformResponse = a => a) {
@@ -62,9 +49,19 @@ export default {
             }];
         }
 
+        /**
+         * 包裹一下useAxios, 
+         * 只为暴露method字段,
+         * 方便循环
+         * @param method get/post/put/patch/delete
+         * @param url 请求地址
+         * @param payloadOrTransform 参数或者变形函数
+         * @param transformResponse 变形函数, 对接口返回的数据进行处理, 只有返回的数据才会被"ref"
+         * @returns 同useAxios的返回值 {@link useAxios}
+         */
         function _warp<T = any>(method: Method, url: string, payloadOrTransform: any, transformResponse: (a: any) => T = (a) => a) {
             const methodLow = method.toLocaleLowerCase() as keyof typeof METHOD_MAP;
-            if (isFunction(payloadOrTransform)) {
+            if (_isFunction(payloadOrTransform)) {
                 return useAxios<T>({ url, method }, payloadOrTransform);
             } else {
                 return useAxios<T>({ url, method, [METHOD_MAP[methodLow]]: payloadOrTransform }, transformResponse);
@@ -72,11 +69,12 @@ export default {
         }
 
         for (const method in METHOD_MAP) {
-            useAxios[method as MEHOTD_NAME_LIST] = function (url, paramsOrTransform, transformResponse) {
+            useAxios[method as keyof typeof METHOD_MAP] = function (url, paramsOrTransform, transformResponse) {
                 return _warp(method as Method, url, paramsOrTransform, transformResponse);
             }
         }
-
+        
+        // 注册$useAxios
         app.config.globalProperties.$useAxios = useAxios;
     }
 }
@@ -86,6 +84,6 @@ function _calcProgress(e: progressEvent) {
     return loaded / total;
 }
 
-function isFunction(input: unknown): input is Function {
+function _isFunction(input: unknown): input is Function {
     return '[object Function]' === Object.prototype.toString.call(input);
 }

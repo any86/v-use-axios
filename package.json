@@ -15,16 +15,17 @@
     "vue": "^3.1.1"
   },
   "files": ["dist"],
-  "types": "global.d.ts",
   "scripts": {
-    "dev": "rollup -c  --watch --environment NODE_ENV:development"
+    "dev": "rollup -c  --watch --environment NODE_ENV:development",
+    "build": "rollup -c"
+
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/any86/vuse-axios.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Russell",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/any86/vuse-axios/issues"
