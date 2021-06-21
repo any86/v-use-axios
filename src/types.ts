@@ -16,8 +16,8 @@ export interface progressEvent {
     loaded: number;
 }
 
-declare module '@vue/runtime-core' {
-    export interface ComponentCustomProperties {
-        $useAxios: UseAxios;
-    }
-}
+// declare module '@vue/runtime-core' {
+//     export interface ComponentCustomProperties {
+//         $useAxios: UseAxios;
+//     }
+// }
