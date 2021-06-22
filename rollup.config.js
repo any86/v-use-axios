@@ -36,10 +36,10 @@ export default {
             sourcemap: true,
         },
         {
-            globals: { 'vue': 'Vue' },
+            globals: { 'vue': 'Vue','axios':'axios' },
             format: 'umd',
             name: 'useAxios',
-            file: `dist/useAxios.umd.js`,
+            file: `dist/v-use-axios.umd.js`,
             sourcemap: true,
         }]
 };

@@ -1,8 +1,21 @@
-import { ref, provide, inject } from 'vue';
+import { ref, inject } from 'vue';
+import axios from 'axios';
 // type
-import { App } from 'vue';
+import { App, Ref } from 'vue';
 import { AxiosRequestConfig, AxiosInstance, Method } from 'axios';
-import { UseAxiosReturn, TransformResponse, progressEvent, PayloadOrTransformResponse } from './types'
+export type UseAxiosReturn<T> = [Ref<boolean>, Ref<T>, { error: Ref<any>, up: Ref<number>, down: Ref<number> }]
+export type TransformResponse<T = any> = (a: any) => T;
+export type PayloadOrTransformResponse = Record<string | number, any> | TransformResponse;
+export interface progressEvent {
+    total: number;
+    loaded: number;
+};
+
+// declare module '@vue/runtime-core' {
+//     export interface ComponentCustomProperties {
+//         $axios: AxiosInstance;
+//     }
+// }
 
 const KEY_DATA = 'data';
 const KEY_PARAMS = 'params';
@@ -17,8 +30,8 @@ export default {
      * @param app vue实例
      * @param axios axios实例
      */
-    install: (app: App, axios: AxiosInstance) => {
-        provide('axiosInstance', axios);
+    install: (app: App, axiosInstance: AxiosInstance = axios) => {
+        app.provide('axiosInstance', axiosInstance);
         // app.config.globalProperties.$axios = axios;
     },
     useAxios,
@@ -41,7 +54,7 @@ function useAxios<DataTransformed = any>(options: AxiosRequestConfig, transformR
     const _responseRef = ref();
     axios.request({
         ...options,
-        
+
         onUploadProgress(e) {
             _uploadProgressRef.value = _calcProgress(e)
         },
