@@ -37,7 +37,7 @@ export default {
         {
             globals: { 'vue': 'Vue','axios':'axios' },
             format: 'umd',
-            name: 'useAxios',
+            name: 'vUseAxios',
             file: `dist/v-use-axios.umd.js`,
             sourcemap: true,
         }]

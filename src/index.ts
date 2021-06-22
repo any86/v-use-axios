@@ -46,7 +46,7 @@ export const linkAxios = {
  * @returns 返回transformResponse处理的数据
  */
 export function useAxios<DataTransformed = any>(options: AxiosRequestConfig, transformResponse: TransformResponse = a => a): UseAxiosReturn<DataTransformed> {
-    const axios = inject('axiosInstance') as AxiosInstance;
+    const axiosInstance = inject('axiosInstance') as AxiosInstance || axios;
     const _errorRef = ref();
     const _isLoadingRef = ref(true);
     const _responseRef = ref();
@@ -60,7 +60,7 @@ export function useAxios<DataTransformed = any>(options: AxiosRequestConfig, tra
 
     function run(options2: AxiosRequestConfig = {}) {
         _isLoadingRef.value = true;
-        axios.request({
+        axiosInstance.request({
             ...options,
             ...options2,
             onUploadProgress(e) {
