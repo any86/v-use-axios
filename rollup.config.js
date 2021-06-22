@@ -32,7 +32,6 @@ export default {
         {
             format: 'cjs',
             file: `dist/index.js`,
-            exports: 'default',
             sourcemap: true,
         },
         {

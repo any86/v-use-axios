@@ -3,8 +3,11 @@ import axios from 'axios';
 // type
 import { App, Ref } from 'vue';
 import { AxiosRequestConfig, AxiosInstance, Method } from 'axios';
-export type UseAxiosReturn<T> = [Ref<boolean>, Ref<T>, { error: Ref<any>, up: Ref<number>, down: Ref<number> }]
+
+export type UseAxiosReturn<T> = [Ref<boolean>, Ref<T>, { run: (config?: AxiosRequestConfig) => void, error: Ref<any>, useUploadProgress: () => Ref<number>, useDownloadProgress: () => Ref<number>, onSuccess: (data?: any) => void, onError: (e?: any) => void }];
+
 export type TransformResponse<T = any> = (a: any) => T;
+
 export type PayloadOrTransformResponse = Record<string | number, any> | TransformResponse;
 export interface progressEvent {
     total: number;
@@ -24,7 +27,7 @@ const METHOD_MAP = {
     'post': KEY_DATA,
 }
 
-export default {
+export const linkAxios = {
     /**
      * 初始化插件
      * @param app vue实例
@@ -33,10 +36,7 @@ export default {
     install: (app: App, axiosInstance: AxiosInstance = axios) => {
         app.provide('axiosInstance', axiosInstance);
         // app.config.globalProperties.$axios = axios;
-    },
-    useAxios,
-    useGet,
-    usePost
+    }
 }
 
 /**
@@ -45,48 +45,83 @@ export default {
  * @param transformResponse 变形接口返回的数据
  * @returns 返回transformResponse处理的数据
  */
-function useAxios<DataTransformed = any>(options: AxiosRequestConfig, transformResponse: TransformResponse = a => a): UseAxiosReturn<DataTransformed> {
+export function useAxios<DataTransformed = any>(options: AxiosRequestConfig, transformResponse: TransformResponse = a => a): UseAxiosReturn<DataTransformed> {
     const axios = inject('axiosInstance') as AxiosInstance;
-    const _uploadProgressRef = ref(0);
-    const _downloadProgressRef = ref(0);
     const _errorRef = ref();
     const _isLoadingRef = ref(true);
     const _responseRef = ref();
-    axios.request({
-        ...options,
 
-        onUploadProgress(e) {
-            _uploadProgressRef.value = _calcProgress(e)
-        },
+    let _downloadProgressRef: Ref<number> | undefined;
+    let _uploadProgressRef: Ref<number> | undefined;
+    // 请求完毕后执行
+    let _onSuccess: (data: any) => void = () => { };
+    let _onError: (error: any) => void = () => { };
 
-        onDownloadProgress(e) {
-            _downloadProgressRef.value = _calcProgress(e)
-        }
-    }).then((response) => {
-        _responseRef.value = transformResponse(response);
-    }).catch((error) => {
-        _errorRef.value = error;
-    }).finally(() => {
-        _isLoadingRef.value = false;
-    });
+
+    function run(options2: AxiosRequestConfig = {}) {
+        _isLoadingRef.value = true;
+        axios.request({
+            ...options,
+            ...options2,
+            onUploadProgress(e) {
+                if (void 0 !== _uploadProgressRef) {
+                    _uploadProgressRef.value = _calcProgress(e)
+                }
+            },
+
+            onDownloadProgress(e) {
+                if (void 0 !== _downloadProgressRef) {
+                    _downloadProgressRef.value = _calcProgress(e)
+                }
+            }
+        }).then((response) => {
+            const dataTransformed = transformResponse(response);
+            _responseRef.value = dataTransformed;
+            _onSuccess(dataTransformed);
+        }).catch((error) => {
+            _errorRef.value = error;
+            _onError(error);
+        }).finally(() => {
+            _isLoadingRef.value = false;
+        });
+    }
+
+    // 开始请求
+    run();
 
     return [_isLoadingRef, _responseRef, {
+        run,
         error: _errorRef,
-        up: _uploadProgressRef,
-        down: _downloadProgressRef
+        useUploadProgress() {
+            _uploadProgressRef = ref(0);
+            return _uploadProgressRef;
+        },
+        useDownloadProgress() {
+            _downloadProgressRef = ref(0);
+            return _downloadProgressRef;
+        },
+
+        onSuccess(cb: (data?: any) => void) {
+            _onSuccess = cb;
+        },
+
+        onError(cb: (data?: any) => void) {
+            _onError = cb;
+        }
     }];
 }
 
+// 别名
+export const useHttp = useAxios;
 
-function useGet<DataTransformed = any>(url: string, paramsOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed>) {
+export function useGet<DataTransformed = any>(url: string, paramsOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed>) {
     return _warp('get', url, paramsOrTransform, transformResponse);
 }
 
 
-function usePost<DataTransformed = any>(url: string, paramsOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed>) {
+export function usePost<DataTransformed = any>(url: string, paramsOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed>) {
     return _warp('post', url, paramsOrTransform, transformResponse);
 }
-
 /**
  * 包裹一下useAxios, 
  * 只为暴露method字段,
@@ -99,11 +134,16 @@ function usePost<DataTransformed = any>(url: string, paramsOrTransform: PayloadO
  */
 function _warp<DataTransformed = any>(method: Method, url: string, payloadOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed> = (a) => a) {
     const methodLow = method.toLocaleLowerCase() as keyof typeof METHOD_MAP;
+    const paramKey = METHOD_MAP[methodLow];
+    let returns: UseAxiosReturn<DataTransformed>;
     if (_isFunction(payloadOrTransform)) {
-        return useAxios<DataTransformed>({ url, method }, payloadOrTransform);
+        returns = useAxios<DataTransformed>({ url, method }, payloadOrTransform);
     } else {
-        return useAxios<DataTransformed>({ url, method, [METHOD_MAP[methodLow]]: payloadOrTransform }, transformResponse);
+        returns = useAxios<DataTransformed>({ url, method, [paramKey]: payloadOrTransform }, transformResponse);
     }
+    // 简化run
+    returns[2].run = (payload: any) => returns[2].run({ [paramKey]: payload });
+    return returns;
 }
 
 
@@ -114,7 +154,7 @@ function _warp<DataTransformed = any>(method: Method, url: string, payloadOrTran
  */
 function _calcProgress(e: progressEvent) {
     const { loaded, total } = e;
-    return loaded / total;
+    return Math.round(loaded / total * 100) / 100;
 }
 
 /**

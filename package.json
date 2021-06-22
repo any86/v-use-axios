@@ -1,7 +1,7 @@
 {
   "name": "v-use-axios",
   "description": "让我们优雅的在vue3中使用axios",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "unpkg": "dist/v-use-axios.umd.js",
