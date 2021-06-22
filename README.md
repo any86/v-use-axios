@@ -106,7 +106,7 @@ export default defineComponent({
 
 -   **error** : 同[axios 中 error](https://github.com/axios/axios#handling-errors),是"ref 数据".
 
-- **run** : 使用新的参数请求, 新参数会合并useAxios的参数, 参数类型同[axios.request(config)](https://github.com/axios/axios#request-config):
+- **run** : 使用新的参数请求, 新参数会合并useAxios的参数, 参数类型同[axios.request(config)](https://github.com/axios/axios#request-config), 执行`run`后, `useAxios`的返回值会被刷新:
 
 ```javascript
 export default defineComponent({

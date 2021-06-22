@@ -1,4 +1,4 @@
-# 如何造一个 vue3 的轮子, 咱也造一个"useXxx"
+# 🌟 vue3写插件变得简单了! 12行代码咱也造一个"useXxx"
 
 ## ref
 
@@ -73,9 +73,15 @@ export function useGet(url) {
 
 ref 的语法这里不讲, 只需要知道`isLoading.value=false`是给`isLoading`赋值即可, 更多请看[vue 官方文档](https://v3.cn.vuejs.org/guide/composition-api-introduction.html#%E5%B8%A6-ref-%E7%9A%84%E5%93%8D%E5%BA%94%E5%BC%8F%E5%8F%98%E9%87%8F)
 
-这时候我们发现本来不能抽象的场景, 现在也可以抽象出一个`useGet`了.
+这时候我们发现本来不能抽象的场景, 现在也可以抽象出一个`useGet`了,叔数数代码刚12行.
 
 
 ## v-use-axios
-沿着上面的思路, 我对axios做了一个完整的封装做成了插件形式, [代码在这里](https://github.com/any86/v-use-axios)
+沿着上面的思路, 我对axios做了一个更完整的封装, [v-use-axios](https://github.com/any86/v-use-axios), 代码不多逻辑也不复杂, 100行左右, 希望有兴趣的小伙伴可以和我一起完善他.
 
+
+
+## 微信群
+感谢大家的阅读, 如有疑问可以加我微信, 我拉你进入**微信群**(由于腾讯对微信群的200人限制, 超过200人后必须由群成员拉入)
+
+![](https://user-gold-cdn.xitu.io/2019/9/19/16d474d245b69492?w=512&h=512&f=jpeg&s=27137)
