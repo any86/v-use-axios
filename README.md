@@ -29,11 +29,9 @@ export default defineComponent({
 });
 ```
 
-### 使用注意
+### 导入已存在axios
 
-`v-use-axios`对您已有的代码是"**0 侵入性**"的:
-
-上面的例子单独引入的 axios, 但实际开发中, **您应该导入您已有的 axios 实例**, 这样`v-use-axios`就会继承您对 axios 的配置
+实际开发中, **您应该导入您已有的 axios 实例**, 这样`v-use-axios`就会继承您对 axios 的配置, 比如拦截器设置等:
 
 **yourAxios.js**
 
@@ -54,11 +52,16 @@ const app = createApp(App);
 app.use(linkAxios, http);
 ```
 
-## API
+## 🌟 API
 
-实际上**v-use-axios**仅仅是对**axios**和**vue**做了一层包装, `useAxios`的语法就是`axios.request`的语法, **所以学习成本接近 0**.
+[useAxios](#useAxios) 通用请求
 
-### useAxios / useHttp
+[useGet](#useGet) Get请求
+
+[usePost](#usePost) Post请求
+
+
+### useAxios
 
 useAxios(config, transform): [isLoadingRef, dataSourceRef, {error,useUploadProgress,useDownloadProgress,onSuccess,onError}]
 
@@ -102,6 +105,22 @@ export default defineComponent({
 ```
 
 -   **error** : 同[axios 中 error](https://github.com/axios/axios#handling-errors),是"ref 数据".
+
+- **run** : 使用新的参数请求, 新参数会合并useAxios的参数, 参数类型同[axios.request(config)](https://github.com/axios/axios#request-config):
+
+```javascript
+export default defineComponent({
+    setup() {
+        const [isLoading, dataSource, { run }] = useAxios({ url: '/api' });
+
+        run({
+            params:{p:1},
+            data:{xx:1}
+        });
+        return { isLoading, dataSource };
+    },
+});
+```
 
 -   **useUploadProgress** : 上传进度(小数),是"ref 数据".
 
@@ -150,7 +169,7 @@ useGet(url, payloadOrTransform, transform)
 
 ##### 返回值
 
-同`$useAxios`返回值
+同`useAxios`返回值
 
 这里简化了 axios.get 中的`params`字段:
 
@@ -161,9 +180,34 @@ useGet('/abc', { x: 1 });
 axios.get('/abc', { params: { x: 1 } });
 ```
 
+##### run
+`useGet`也会返回`run`函数, 但是参数和`useAxios`返回的`run`不同, 参数更精简:
+```javascript
+export default defineComponent({
+    setup() {
+        const [isLoading, dataSource, { run }] = useGet('/api');
+
+        run({p:1});
+    },
+});
+```
+
+```javascript
+export default defineComponent({
+    setup() {
+        const [isLoading, dataSource, { run }] = useAxios({ url: '/api' });
+
+        run({
+            params:{p:1},
+        });
+    },
+});
+```
+
+
 ### usePost
 
-使用方式同 $useAxios.get
+使用方式同 useGet
 
 ```javascript
 import { usePost } from 'v-use-axios';
