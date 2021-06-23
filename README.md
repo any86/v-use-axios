@@ -175,7 +175,7 @@ useGet(url, payloadOrTransform, transform)
 
 ```javascript
 import { useGet } from 'v-use-axios';
-useGet('/abc', { x: 1 });
+const [isloading,dataSource] = useGet('/abc', { x: 1 });
 // 等价于
 axios.get('/abc', { params: { x: 1 } });
 ```
