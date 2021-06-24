@@ -63,21 +63,15 @@ app.use(linkAxios, http);
 
 ### useAxios
 
-useAxios(config, transform): [isLoadingRef, dataSourceRef, {error,useUploadProgress,useDownloadProgress,onSuccess,onError}]
+useAxios(config, transform): [isLoadingRef, dataSourceRef, {error, useUploadProgress, useDownloadProgress, onSuccess, onError}]
 
 ##### 参数
 
--   **config**
+##### config
     同[axios.request(config)](https://github.com/axios/axios#request-config).
 
--   **transform**
+##### transform
     可选参数, "变形函数", 可以用来控制返回的 dataSourceRef 的格式.
-
-##### 返回值
-
--   **isLoadingRef** : 表示是否加载接口中.
-
--   **dataSourceRef** : 接口返回数据, 受**transform**控制.
 
 ```javascript
 import { useAxios } from 'v-use-axios';
@@ -104,9 +98,16 @@ export default defineComponent({
 });
 ```
 
--   **error** : 同[axios 中 error](https://github.com/axios/axios#handling-errors),是"ref 数据".
 
-- **run** : 使用新的参数请求, 新参数会合并useAxios的参数, 参数类型同[axios.request(config)](https://github.com/axios/axios#request-config), 执行`run`后, `useAxios`的返回值会被刷新:
+##### 返回值
+
+##### isLoadingRef : 表示是否加载接口中.
+
+##### dataSourceRef : 接口返回数据, 受**transform**控制.
+
+##### error : 同[axios 中 error](https://github.com/axios/axios#handling-errors),是"ref 数据".
+
+##### run : 使用新的参数请求, 新参数会合并useAxios的参数, 参数类型同[axios.request(config)](https://github.com/axios/axios#request-config), 执行`run`后, `useAxios`的返回值会被刷新:
 
 ```javascript
 export default defineComponent({
@@ -122,7 +123,7 @@ export default defineComponent({
 });
 ```
 
--   **useUploadProgress** : 上传进度(小数),是"ref 数据".
+##### useUploadProgress : 上传进度(小数),是"ref 数据".
 
 ```javascript
 export default defineComponent({
@@ -136,9 +137,9 @@ export default defineComponent({
 });
 ```
 
--   **useDownloadProgress** : 下载进度(小数),是"ref 数据".
+##### useDownloadProgress : 下载进度(小数),是"ref 数据".
 
--   **onSuccess** : 请求成功钩子.
+##### onSuccess : 请求成功钩子.
 
 ```javascript
 export default defineComponent({
@@ -159,15 +160,15 @@ export default defineComponent({
 
 useGet(url, payloadOrTransform, transform)
 
-##### 参数
+#### 参数
 
--   **url** : 接口地址
+##### url : 接口地址
 
--   **payloadOrTransform** : 可选, 如果传递对象, 那么就是请求参数, 如果是函数, 就是"变形函数".
+##### payloadOrTransform : 可选, 如果传递对象, 那么就是请求参数, 如果是函数, 就是"变形函数".
 
--   **transform** : 可选, "变形函数"
+##### transform : 可选, "变形函数"
 
-##### 返回值
+#### 返回值
 
 同`useAxios`返回值
 
@@ -219,3 +220,8 @@ usePost('/abc', { x: 1 });
 ### 为什么没有`usePut`等其他请求方式?
 
 使用`axios`有时候传递参数`params`和`data`都会用, 我怕封装过度, 又参考了 jquery 对 xhr 的封装, 所以暂时只封装了 `get` 和 `post`, 其他情况请暂时请先用`useAxios`.
+
+
+### 获取的`dataSouce`我想修改, 但是返回的`dataSouce.value`还没有值?
+
+这个可以通过[transform](#transform)参数解决
