@@ -114,12 +114,11 @@ export function useAxios<DataTransformed = any>(options: AxiosRequestConfig, tra
 // 别名
 export const useHttp = useAxios;
 
-export function useGet<DataTransformed = any>(url: string, paramsOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed>) {
+export function useGet<DataTransformed = any>(url: string, paramsOrTransform?: PayloadOrTransformResponse, transformResponse?: TransformResponse<DataTransformed>) {
     return _warp('get', url, paramsOrTransform, transformResponse);
 }
 
-
-export function usePost<DataTransformed = any>(url: string, paramsOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed>) {
+export function usePost<DataTransformed = any>(url: string, paramsOrTransform?: PayloadOrTransformResponse, transformResponse?: TransformResponse<DataTransformed>) {
     return _warp('post', url, paramsOrTransform, transformResponse);
 }
 /**
@@ -132,7 +131,7 @@ export function usePost<DataTransformed = any>(url: string, paramsOrTransform: P
  * @param transformResponse 变形函数, 对接口返回的数据进行处理, 只有返回的数据才会被"ref"
  * @returns 同useAxios的返回值 {@link useAxios}
  */
-function _warp<DataTransformed = any>(method: Method, url: string, payloadOrTransform: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed> = (a) => a) {
+function _warp<DataTransformed = any>(method: Method, url: string, payloadOrTransform?: PayloadOrTransformResponse, transformResponse: TransformResponse<DataTransformed> = (a) => a) {
     const methodLow = method.toLocaleLowerCase() as keyof typeof METHOD_MAP;
     const paramKey = METHOD_MAP[methodLow];
     let returns: UseAxiosReturn<DataTransformed>;
