@@ -12,17 +12,22 @@
         <div id="app"></div>
         <script src="./dist/v-use-axios.umd.js"></script>
         <script>
-            const {useGet} = vUseAxios
+            const http = axios.create({
+                baseURL: `http://192.0.0.1`,
+            });
+
+            const { useGet,linkAxios } = vUseAxios;
             const { createApp, h } = Vue;
             const app = createApp({
                 render() {
                     return h('div', {});
                 },
-                setup(){
-                    useGet('/a')
-                }
+                
+                setup() {
+                    useGet('/a');
+                },
             });
-
+            app.use(linkAxios,http);
             app.mount('#app');
         </script>
     </body>
