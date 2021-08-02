@@ -27,17 +27,21 @@ const METHOD_MAP = {
     'post': KEY_DATA,
 }
 
-export const linkAxios = {
-    /**
-     * 初始化插件
-     * @param app vue实例
-     * @param axios axios实例
-     */
-    install: (app: App, axiosInstance: AxiosInstance = axios) => {
-        app.provide('axiosInstance', axiosInstance);
-        // app.config.globalProperties.$axios = axios;
-    }
+
+let DEFAULT_AXIOS = axios.create();
+export function linkAxios(axios = DEFAULT_AXIOS) {
+    DEFAULT_AXIOS = axios;
 }
+/**
+ * 初始化插件
+ * @param app vue实例
+ * @param axios axios实例
+ */
+linkAxios.install = (app: App, axiosInstance: AxiosInstance = DEFAULT_AXIOS) => {
+    app.provide('axiosInstance', axiosInstance);
+    // app.config.globalProperties.$axios = axios;
+}
+
 
 /**
  * 封装axios
@@ -46,7 +50,7 @@ export const linkAxios = {
  * @returns 返回transformResponse处理的数据
  */
 export function useAxios<DataTransformed = any>(options: AxiosRequestConfig, transformResponse: TransformResponse = a => a): UseAxiosReturn<DataTransformed> {
-    const axiosInstance = inject('axiosInstance') as AxiosInstance || axios;
+    const axiosInstance = inject('axiosInstance') as AxiosInstance || DEFAULT_AXIOS;
     const _errorRef = ref();
     const _isLoadingRef = ref(true);
     const _responseRef = ref();
